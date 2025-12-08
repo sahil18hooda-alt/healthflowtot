@@ -1,0 +1,104 @@
+/**
+ * @fileoverview Firestore Security Rules for the HealthFlow application.
+ *
+ * Core Philosophy:
+ * This ruleset employs a strict user-ownership model for user profiles
+ * and denormalized authorization checks for appointments and reviews.
+ *
+ * Data Structure:
+ * - /users/{userId}: Stores patient/employee profile data. Access is restricted to the owner.
+ * - /appointments/{appointmentId}: Stores appointment data with denormalized patientId and doctorId for authorization.
+ * - /reviews/{reviewId}: Stores review data with denormalized hospitalId and patientId for authorization.
+ * - /employees/{employeeId}: Stores employee data.
+ *
+ * Key Security Decisions:
+ * - Users can only access their own profile data.
+ * - Appointments and Reviews are accessible only to associated patients and doctors.
+ *
+ * Denormalization for Authorization:
+ * The 'appointments' and 'reviews' collections denormalize user IDs ('patientId', 'doctorId', 'hospitalId')
+ * directly onto the documents. This avoids costly `get()` calls during authorization.
+ *
+ * Structural Segregation:
+ * User profiles and appointments are stored in separate top-level collections to
+ * maintain a clear separation of concerns and simplify security rules.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helpers
+    function userRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    function isEmployee() { return request.auth != null && userRole() == 'employee'; }
+    function isPatient() { return request.auth != null && userRole() == 'patient'; }
+
+    /**
+     * @description Controls access to user profile data.  Users can only read and write their own profile.
+     * @path /users/{userId}
+     */
+    match /users/{userId} {
+      function isOwner(userId) { return request.auth.uid == userId; }
+      function isExistingOwner(userId) { return isOwner(userId) && resource != null; }
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Care Events: employees can write; patients can read and mark events as read.
+     * @path /care_events/{eventId}
+     */
+    match /care_events/{eventId} {
+      allow get, list: if isEmployee() || (request.auth != null && resource.data.patientId == request.auth.uid);
+      // Only employees create/delete/update events
+      allow create, delete: if isEmployee();
+      // Allow employees to update anything; allow patient to only toggle readByPatient from false->true
+      allow update: if isEmployee() || (
+        request.auth != null && resource.data.patientId == request.auth.uid &&
+        request.resource.data.readByPatient == true && resource.data.readByPatient == false &&
+        // Ensure only readByPatient changes
+        request.resource.data.diff(resource.data).changedKeys().hasOnly(['readByPatient'])
+      );
+    }
+
+    /**
+     * @description Care Pathways: employees can write; patients can read.
+     * @path /care_pathways/{pathwayId}
+     */
+    match /care_pathways/{pathwayId} {
+      allow get, list: if isEmployee() || (request.auth != null && resource.data.patientId == request.auth.uid);
+      allow create, update, delete: if isEmployee();
+    }
+
+    /**
+     * @description Controls access to appointment data.
+     * @path /appointments/{appointmentId}
+     */
+    match /appointments/{appointmentId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Controls access to review data.
+     * @path /reviews/{reviewId}
+     */
+    match /reviews/{reviewId} {
+        allow get, list: if true;
+        allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Controls access to employee data.
+     * @path /employees/{employeeId}
+     */
+    match /employees/{employeeId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "placeholderImages": [
+    {
+      "id": "doctor-1",
+      "description": "A friendly male doctor in his 40s.",
+      "imageUrl": "https://images.unsplash.com/photo-1582750433449-648ed127bb54?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxJbmRpYW4lMjBkb2N0b3J8ZW58MHx8fHwxNzU5MDY5MDQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Indian doctor"
+    },
+    {
+      "id": "doctor-2",
+      "description": "A compassionate female doctor in her 30s.",
+      "imageUrl": "https://images.unsplash.com/photo-1612349316228-5942a9b489c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkb2N0b3J8ZW58MHx8fHwxNzIyMzgxODg5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Indian doctor"
+    },
+    {
+      "id": "doctor-3",
+      "description": "An experienced senior male doctor.",
+      "imageUrl": "https://media.istockphoto.com/id/497142181/photo/physician.jpg?s=612x612&w=0&k=20&c=PX_lRXXQo7lUpE1Slj2vHsiCnZZnVNF_OX99-ag6O_8=",
+      "imageHint": "doctor"
+    },
+    {
+      "id": "doctor-4",
+      "description": "A young, energetic Indian female doctor.",
+      "imageUrl": "https://media.istockphoto.com/id/1293373291/photo/portrait-of-confident-ethnic-female-doctor.jpg?s=612x612&w=0&k=20&c=CJsw6IgTecJZoBeVXqZdvh2BI-NyVa-8VcQM3fPhbYc=",
+      "imageHint": "Indian female doctor"
+    },
+    {
+      "id": "doctor-5",
+      "description": "A male doctor with glasses, smiling.",
+      "imageUrl": "https://images.unsplash.com/photo-1612636322033-f48f76c34bab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxJbmRpYW4lMjBkb2N0b3J8ZW58MHx8fHwxNzU5MDY5MDQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Indian doctor"
+    },
+    {
+      "id": "doctor-6",
+      "description": "A female surgeon in scrubs.",
+      "imageUrl": "https://media.istockphoto.com/id/1194419245/photo/i-have-a-chance-to-make-a-difference-each-day.jpg?s=612x612&w=0&k=20&c=iyacaRuIIYabsuhojT2nDyamlxILvHMZl1NL2--Prvw=",
+      "imageHint": "Indian doctor"
+    }
+  ]
+}

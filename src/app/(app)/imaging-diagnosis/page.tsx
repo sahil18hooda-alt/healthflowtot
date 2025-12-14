@@ -61,52 +61,52 @@ function ImagingDiagnosisContent() {
       setIsLoading(false);
     }
   };
-  
-   const handleDownloadReport = () => {
-        const reportElement = document.getElementById('ai-report-card');
-        if (!reportElement || !analysis) {
-            toast({
-                title: "Error",
-                description: "Cannot download report right now. Please try again.",
-                variant: "destructive"
-            });
-            return;
-        }
 
-        toast({
-            title: "Generating PDF...",
-            description: "Your report is being prepared for download.",
-        });
+  const handleDownloadReport = () => {
+    const reportElement = document.getElementById('ai-report-card');
+    if (!reportElement || !analysis) {
+      toast({
+        title: "Error",
+        description: "Cannot download report right now. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-        html2canvas(reportElement, { scale: 2 }).then((canvas) => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'px', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            const canvasWidth = canvas.width;
-            const canvasHeight = canvas.height;
-            const ratio = canvasWidth / canvasHeight;
-            const width = pdfWidth;
-            const height = width / ratio;
+    toast({
+      title: "Generating PDF...",
+      description: "Your report is being prepared for download.",
+    });
 
-            let position = 0;
-            if (height < pdfHeight) {
-                position = (pdfHeight - height) / 2;
-            }
-            
-            pdf.addImage(imgData, 'PNG', 0, position, width, height);
-            pdf.save(`HealthFlow_Imaging_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-        });
-    };
+    html2canvas(reportElement, { scale: 2 }).then((canvas) => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'px', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      const ratio = canvasWidth / canvasHeight;
+      const width = pdfWidth;
+      const height = width / ratio;
+
+      let position = 0;
+      if (height < pdfHeight) {
+        position = (pdfHeight - height) / 2;
+      }
+
+      pdf.addImage(imgData, 'PNG', 0, position, width, height);
+      pdf.save(`HealthFlow_Imaging_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    });
+  };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <ScanSearch /> AI Imaging &amp; Diagnosis
+          <ScanSearch /> AI Imaging &amp; Diagnosis <span className="text-sm font-normal text-muted-foreground ml-2">(Powered by RetinaXpert AI)</span>
         </h1>
         <p className="text-muted-foreground">
-          Upload a medical image for a preliminary, AI-powered diagnostic analysis.
+          Upload a medical image (e.g., X-Ray, MRI, Retinal Scan) for a preliminary, AI-powered diagnostic analysis.
         </p>
       </div>
 
@@ -121,7 +121,9 @@ function ImagingDiagnosisContent() {
       <Card>
         <CardHeader>
           <CardTitle>Upload Medical Image</CardTitle>
-          <CardDescription>Upload an X-ray, CT scan, or MRI image (JPG, PNG). DICOM support is experimental.</CardDescription>
+          <CardDescription>
+            Supports <strong>Retinal Fundus images</strong> (for Eye Disease Detection), X-rays, CT scans, and MRIs.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {!image ? (
@@ -140,13 +142,13 @@ function ImagingDiagnosisContent() {
             </div>
           ) : (
             <div className="relative w-full max-w-md mx-auto bg-black rounded-md p-2">
-                <Image src={image} alt="Medical image preview" width={512} height={512} className="rounded-md object-contain aspect-square mx-auto" />
-                <Button variant="destructive" size="icon" className="absolute top-2 right-2 z-10" onClick={() => setImage(null)}>
-                    <Trash2 className="h-4 w-4" />
-                </Button>
+              <Image src={image} alt="Medical image preview" width={512} height={512} className="rounded-md object-contain aspect-square mx-auto" />
+              <Button variant="destructive" size="icon" className="absolute top-2 right-2 z-10" onClick={() => setImage(null)}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           )}
-          
+
           <div className="flex items-center space-x-2">
             <Checkbox id="consent" checked={hasConsented} onCheckedChange={(checked) => setHasConsented(!!checked)} />
             <Label htmlFor="consent" className="text-sm text-muted-foreground">
@@ -175,108 +177,108 @@ function ImagingDiagnosisContent() {
             <CardTitle>AI Diagnostic Report</CardTitle>
             <CardDescription>This is a preliminary analysis. Please review with your doctor.</CardDescription>
           </CardHeader>
-<CardContent className="space-y-6">
+          <CardContent className="space-y-6">
             {isLoading && !analysis ? (
-                <div className="space-y-6">
-                    <Skeleton className="h-8 w-3/4" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-5/6" />
-                    <div className="space-y-4 pt-4">
-                        <Skeleton className="h-8 w-1/2" />
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
+              <div className="space-y-6">
+                <Skeleton className="h-8 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <div className="space-y-4 pt-4">
+                  <Skeleton className="h-8 w-1/2" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
                 </div>
+              </div>
             ) : analysis && (
-                <>
-                    {analysis.usingFallback && (
-                        <Alert variant="default">
-                            <AlertTitle className="text-lg">Showing a fallback report</AlertTitle>
-                            <AlertDescription>
-                                The AI service isn’t available right now. This report is a generic placeholder and may not reflect your image. Try again later.
-                            </AlertDescription>
-                        </Alert>
+              <>
+                {analysis.usingFallback && (
+                  <Alert variant="default">
+                    <AlertTitle className="text-lg">Showing a fallback report</AlertTitle>
+                    <AlertDescription>
+                      The AI service isn’t available right now. This report is a generic placeholder and may not reflect your image. Try again later.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <Alert variant="default">
+                  <AlertTitle className="text-lg">Recommended Department for Follow-up</AlertTitle>
+                  <AlertDescription className="text-base font-semibold text-primary">
+                    {analysis.recommendedDepartment}
+                  </AlertDescription>
+                </Alert>
+
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">Overall Summary</h3>
+                  <p className="text-sm text-muted-foreground">{analysis.summary}</p>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg">Potential Conditions</h3>
+                  {analysis.potentialConditions.length > 0 ? analysis.potentialConditions.map((item, index) => (
+                    <div key={index} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <p className="font-medium">{item.condition}</p>
+                        <span className="font-bold text-primary">{item.confidence}% Confidence</span>
+                      </div>
+                      <Progress value={item.confidence} className="h-2" />
+                    </div>
+                  )) : <p className="text-sm text-muted-foreground">No specific conditions identified with high confidence.</p>}
+                </div>
+
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">Key Observations</h3>
+                  <div className="prose prose-sm max-w-none text-muted-foreground rounded-md border p-4 bg-muted/50">
+                    <ul className="list-disc pl-5">
+                      {analysis.observations.split('\n').map((obs, i) => obs.trim().length > 1 && <li key={i}>{obs.replace(/^- /, '')}</li>)}
+                    </ul>
+                  </div>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>AI Confidence Visualization (Simulated)</CardTitle>
+                    <CardDescription>This is a generated heatmap showing which parts of the image the AI may have focused on.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex items-center justify-center bg-black rounded-md aspect-video p-2">
+                    {analysis.heatmapDataUri ? (
+                      <Image src={analysis.heatmapDataUri} alt="AI Heatmap Visualization" width={512} height={512} className="rounded-md object-contain aspect-square mx-auto" />
+                    ) : image ? (
+                      <div className="relative w-full max-w-md aspect-square mx-auto rounded-md overflow-hidden">
+                        <Image src={image} alt="Original image (fallback visualization)" fill className="object-contain" />
+                        <div
+                          className="absolute inset-0 pointer-events-none"
+                          style={{
+                            background:
+                              'radial-gradient(circle at 60% 40%, rgba(255,0,0,0.45), rgba(255,165,0,0.35) 25%, rgba(255,255,0,0.2) 50%, rgba(0,0,0,0) 75%)',
+                            mixBlendMode: 'screen',
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        <Loader2 className="h-8 w-8 animate-spin" />
+                        <p>Generating visualization...</p>
+                      </div>
                     )}
+                  </CardContent>
+                </Card>
 
-                    <Alert variant="default">
-                        <AlertTitle className="text-lg">Recommended Department for Follow-up</AlertTitle>
-                        <AlertDescription className="text-base font-semibold text-primary">
-                            {analysis.recommendedDepartment}
-                        </AlertDescription>
-                    </Alert>
-
-                    <div>
-                        <h3 className="font-semibold text-lg mb-2">Overall Summary</h3>
-                        <p className="text-sm text-muted-foreground">{analysis.summary}</p>
-                    </div>
-
-                    <div className="space-y-4">
-                        <h3 className="font-semibold text-lg">Potential Conditions</h3>
-                        {analysis.potentialConditions.length > 0 ? analysis.potentialConditions.map((item, index) => (
-                            <div key={index} className="space-y-2">
-                                <div className="flex justify-between items-center">
-                                    <p className="font-medium">{item.condition}</p>
-                                    <span className="font-bold text-primary">{item.confidence}% Confidence</span>
-                                </div>
-                                <Progress value={item.confidence} className="h-2" />
-                            </div>
-                        )) : <p className="text-sm text-muted-foreground">No specific conditions identified with high confidence.</p>}
-                    </div>
-                    
-                    <div>
-                        <h3 className="font-semibold text-lg mb-2">Key Observations</h3>
-                        <div className="prose prose-sm max-w-none text-muted-foreground rounded-md border p-4 bg-muted/50">
-                            <ul className="list-disc pl-5">
-                            {analysis.observations.split('\n').map((obs, i) => obs.trim().length > 1 && <li key={i}>{obs.replace(/^- /, '')}</li>)}
-                            </ul>
-                        </div>
-                    </div>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>AI Confidence Visualization (Simulated)</CardTitle>
-                            <CardDescription>This is a generated heatmap showing which parts of the image the AI may have focused on.</CardDescription>
-                        </CardHeader>
-<CardContent className="flex items-center justify-center bg-black rounded-md aspect-video p-2">
-                            {analysis.heatmapDataUri ? (
-                                <Image src={analysis.heatmapDataUri} alt="AI Heatmap Visualization" width={512} height={512} className="rounded-md object-contain aspect-square mx-auto" />
-                            ) : image ? (
-                                <div className="relative w-full max-w-md aspect-square mx-auto rounded-md overflow-hidden">
-                                    <Image src={image} alt="Original image (fallback visualization)" fill className="object-contain" />
-                                    <div
-                                        className="absolute inset-0 pointer-events-none"
-                                        style={{
-                                            background:
-                                                'radial-gradient(circle at 60% 40%, rgba(255,0,0,0.45), rgba(255,165,0,0.35) 25%, rgba(255,255,0,0.2) 50%, rgba(0,0,0,0) 75%)',
-                                            mixBlendMode: 'screen',
-                                        }}
-                                    />
-                                </div>
-                            ) : (
-                                <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                                    <Loader2 className="h-8 w-8 animate-spin" />
-                                    <p>Generating visualization...</p>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    <Alert variant="destructive">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle>Disclaimer</AlertTitle>
-                        <AlertDescription>{analysis.disclaimer}</AlertDescription>
-                    </Alert>
-                </>
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Disclaimer</AlertTitle>
+                  <AlertDescription>{analysis.disclaimer}</AlertDescription>
+                </Alert>
+              </>
             )}
           </CardContent>
-           {analysis && (
+          {analysis && (
             <CardFooter className="gap-4">
-                    <Button onClick={handleDownloadReport} disabled={!analysis}>
-                        <Download className="mr-2 h-4 w-4" />
-                        Download Report (PDF)
-                    </Button>
-                </CardFooter>
-            )}
+              <Button onClick={handleDownloadReport} disabled={!analysis}>
+                <Download className="mr-2 h-4 w-4" />
+                Download Report (PDF)
+              </Button>
+            </CardFooter>
+          )}
         </Card>
       )}
     </div>
@@ -284,10 +286,10 @@ function ImagingDiagnosisContent() {
 }
 
 export default function ImagingDiagnosisPage() {
-    return (
-        // Suspense is needed because we are using useSearchParams
-        <React.Suspense fallback={<div>Loading...</div>}>
-            <ImagingDiagnosisContent />
-        </React.Suspense>
-    )
+  return (
+    // Suspense is needed because we are using useSearchParams
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <ImagingDiagnosisContent />
+    </React.Suspense>
+  )
 }

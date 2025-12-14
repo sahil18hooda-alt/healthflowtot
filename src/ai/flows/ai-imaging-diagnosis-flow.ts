@@ -5,8 +5,8 @@
  * - diagnoseImage - A function that handles the image analysis.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 import type { ImagingDiagnosisInput, ImagingDiagnosisOutput } from '@/lib/types';
 import { gemini15Pro } from '@genkit-ai/googleai';
 
@@ -15,11 +15,11 @@ import { gemini15Pro } from '@genkit-ai/googleai';
 const HAS_GENAI_KEY = !!process.env.GOOGLE_GENAI_API_KEY;
 
 const ImagingDiagnosisInputSchema = z.object({
-  image: z
-    .string()
-    .describe(
-      "A medical image (e.g., X-ray, CT scan) as a data URI. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
+    image: z
+        .string()
+        .describe(
+            "A medical image (e.g., X-ray, CT scan) as a data URI. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+        ),
 });
 
 const ImagingDiagnosisOutputSchema = z.object({
@@ -36,20 +36,29 @@ const ImagingDiagnosisOutputSchema = z.object({
 
 const textAnalysisPrompt = ai.definePrompt({
     name: 'imagingDiagnosisTextPrompt',
-    input: {schema: ImagingDiagnosisInputSchema},
-    output: {schema: ImagingDiagnosisOutputSchema},
+    input: { schema: ImagingDiagnosisInputSchema },
+    output: { schema: ImagingDiagnosisOutputSchema },
     prompt: `You are an expert AI radiology assistant. Your task is to analyze a medical image and provide a preliminary diagnostic report for informational purposes.
 
 Image to Analyze: {{media url=image}}
 
 Analyze the image for any abnormalities or significant findings.
+
+**Special Instruction for Eye Scans:**
+If the image appears to be a Retinal Fundus scan or an eye image, you must specifically evaluate it for signs of:
+- Diabetic Retinopathy (Microaneurysms, Hemorrhages, Exudates)
+- Glaucoma (Optic Cup-to-Disc ratio abnormalities)
+- Cataract (Lens opacity)
+- Age-related Macular Degeneration (Drusen, Pigment changes)
+
+**General Analysis Steps:**
 1.  Identify a list of 'potentialConditions'. For each condition, provide your 'confidence' score as a percentage (0-100).
 2.  Write a concise 'summary' of your findings in simple terms.
 3.  Provide a bulleted list of detailed 'observations'.
-4.  Based on your findings, determine the single most appropriate 'recommendedDepartment' for a follow-up (e.g., \"Pulmonology\", \"Oncology\", \"Orthopedics\").
-5.  You MUST include the following 'disclaimer': \"This AI-generated analysis is for informational purposes only and is NOT a substitute for a professional diagnosis from a qualified radiologist or physician. Please consult with your healthcare provider to review these findings.\"
+4.  Based on your findings, determine the single most appropriate 'recommendedDepartment' for a follow-up (e.g., "Pulmonology", "Oncology", "Orthopedics", "Ophthalmology").
+5.  You MUST include the following 'disclaimer': "This AI-generated analysis is for informational purposes only and is NOT a substitute for a professional diagnosis from a qualified radiologist or physician. Please consult with your healthcare provider to review these findings."
 
-If the image does not appear to be a medical scan or is unclear, state that in the summary and observations, and set the department to \"General Practice\".
+If the image does not appear to be a medical scan or is unclear, state that in the summary and observations, and set the department to "General Practice".
 `,
 });
 
@@ -72,8 +81,8 @@ const generateHeatmapFlow = ai.defineFlow(
             const result: any = await ai.generate({
                 model: gemini15Pro,
                 prompt: [
-                    {media: {url: flowInput.image}},
-                    {text: 'Based on the provided medical image (like an X-ray or CT scan), generate a simulated Grad-CAM heatmap. The heatmap should be a plausible visualization of where an AI might focus its attention to make a diagnosis. Overlay this heatmap onto the original image. The heatmap should use a color scale from yellow (low attention) to red (high attention) and be semi-transparent.'},
+                    { media: { url: flowInput.image } },
+                    { text: 'Based on the provided medical image (like an X-ray or CT scan), generate a simulated Grad-CAM heatmap. The heatmap should be a plausible visualization of where an AI might focus its attention to make a diagnosis. Overlay this heatmap onto the original image. The heatmap should use a color scale from yellow (low attention) to red (high attention) and be semi-transparent.' },
                 ],
                 config: {
                     responseModalities: ['TEXT', 'IMAGE'],
@@ -121,7 +130,7 @@ const diagnoseImageFlow = ai.defineFlow(
     },
     async (flowInput) => {
         // Helper fallback when AI service is unavailable or fails.
-const fallback = (): ImagingDiagnosisOutput => ({
+        const fallback = (): ImagingDiagnosisOutput => ({
             potentialConditions: [],
             summary: 'AI service is not available. Showing a safe, generic summary based on the uploaded image. Please try again later or contact support if the issue persists.',
             observations: '- The provided image could not be analyzed by the AI service.\\n- Ensure the file is a supported medical image (JPG/PNG).',
@@ -150,7 +159,7 @@ const fallback = (): ImagingDiagnosisOutput => ({
                 return fallback();
             }
 
-return {
+            return {
                 ...output,
                 heatmapDataUri: heatmapMaybe || undefined,
                 usingFallback: false,
